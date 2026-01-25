@@ -1,0 +1,68 @@
+services:
+  # 1. データベース
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: god_scheduler_db
+    environment:
+      - ACCEPT_EULA=Y
+      # 👇 パスワードはこれに統一！
+      - MSSQL_SA_PASSWORD=GodScheduler2026
+    ports:
+      - "1433:1433"
+    volumes:
+      # 👇 名前を "sql_data_final" に変えて、強制的に新品にする！
+      - sql_data_final:/var/opt/mssql
+
+  # 2. バックエンド API (.NET)
+  api:
+    build:
+      context: ./GodScheduler.Api
+      dockerfile: Dockerfile
+    container_name: god_scheduler_api
+    ports:
+      - "5078:8080"
+    environment:
+      # 👇 Docker内では環境変数で上書き (Mac側と干渉させない)
+      - ConnectionStrings__DefaultConnection=Server=db;Database=GodSchedulerDb;User Id=sa;Password=GodScheduler2026;TrustServerCertificate=True;
+    depends_on:
+      - db
+    # 👇【New!】ここが Watch の設定バイ！
+    develop:
+      watch:
+        # C#ファイルが変わったら、イメージを作り直して再起動 (Rebuild)
+        - action: rebuild
+          path: ./GodScheduler.Api
+          target: /src
+          ignore:
+            - bin/
+            - obj/
+
+  # 3. フロントエンド (Next.js)
+  web:
+    build:
+      context: ./god-scheduler
+      dockerfile: Dockerfile
+    container_name: god_scheduler_web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5078
+    depends_on:
+      - api
+    # 👇【New!】フロントエンドは爆速同期 (Sync) バイ！
+    develop:
+      watch:
+        # ファイルが変わったら、コンテナの中に即転送 (Sync)
+        - action: sync
+          path: ./god-scheduler
+          target: /app
+          ignore:
+            - node_modules/
+            - .next/
+        # package.json が変わった時だけは作り直し (Rebuild)
+        - action: rebuild
+          path: ./god-scheduler/package.json
+
+volumes:
+  # 👇 新品のボリュームを定義
+  sql_data_final:
