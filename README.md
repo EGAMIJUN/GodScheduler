@@ -30,7 +30,6 @@ Docker Compose Watch を採用し、モダンな開発体験（Hot Reload）を�
 バックエンド・フロントエンド共に、コード修正が即座に反映されます。
 ```bash
 docker compose up --watch
-
 ```
 
 
