@@ -21,15 +21,15 @@ Docker Compose Watch を採用し、モダンな開発体験（Hot Reload）を�
 
 1. **リポジトリをクローン**
    ```bash
-   git clone [https://github.com/EGAMIJUN/GodScheduler.git](https://github.com/EGAMIJUN/GodScheduler.git)
+   git clone https://github.com/EGAMIJUN/GodScheduler.git
    cd GodScheduler
 
-```
 
-2. **Docker 監視モードで起動 (推奨)**
+2. **Docker 監視モードで起動 (推奨) バックエンド・フロントエンド共に、コード修正が即座に反映されます。**
 バックエンド・フロントエンド共に、コード修正が即座に反映されます。
 ```bash
 docker compose up --watch
+
 ```
 
 
@@ -46,7 +46,7 @@ docker compose up --watch
 
 ## 🏗️ アーキテクチャ情報
 
-* **API Server**: `http://localhost:5078`
+* **API Server**: `http://localhost:5078` (Internal: 8080)
 * **Web Client**: `http://localhost:3000`
 * **Database**: `localhost:1433`
 * **User**: `sa`
@@ -58,3 +58,4 @@ docker compose up --watch
 
 * **EGAMIJUN** - Port IT Specialist
 
+`
