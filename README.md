@@ -19,7 +19,43 @@ Docker Compose Watch を採用し、モダンな開発体験（Hot Reload）を�
 
 ### 起動手順 (How to start)
 
-1. リポジトリをクローン
+1. **リポジトリをクローン**
    ```bash
    git clone [https://github.com/EGAMIJUN/GodScheduler.git](https://github.com/EGAMIJUN/GodScheduler.git)
    cd GodScheduler
+
+```
+
+2. **Docker 監視モードで起動 (推奨)**
+バックエンド・フロントエンド共に、コード修正が即座に反映されます。
+```bash
+docker compose up --watch
+
+```
+
+
+3. **データベースの初期化 (Seed)**
+初回起動時、DBは空の状態です。以下の手順で初期データを投入してください。
+* Swagger UI にアクセス: [http://localhost:5078/swagger](https://www.google.com/search?q=http://localhost:5078/swagger)
+* `GET /api/Seed` を実行 (Try it out -> Execute)
+
+
+4. **アプリケーションにアクセス**
+* フロントエンド (画面): [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000)
+
+
+
+## 🏗️ アーキテクチャ情報
+
+* **API Server**: `http://localhost:5078`
+* **Web Client**: `http://localhost:3000`
+* **Database**: `localhost:1433`
+* **User**: `sa`
+* **Password**: `GodScheduler2026`
+
+
+
+## 👨‍💻 開発者 (Author)
+
+* **EGAMIJUN** - Port IT Specialist
+
