@@ -1,114 +1,155 @@
 using GodScheduler.Api.Models;
 
-namespace GodScheduler.Api.Services;
-
-public class MonteCarloEngine
+namespace GodScheduler.Api.Services
 {
-    private Random _random = new Random();
-
+    // 結果を格納するクラス
     public class AllocationResult
     {
-        public List<Cargo> AssignedCargos { get; set; } = new();
-        public int Score { get; set; }
-        public string Message { get; set; } = string.Empty;
+        // 誰をどこに配置したかのリスト
+        public List<CargoWorker> Matches { get; set; } = new();
+        public double Score { get; set; }
+        public string LogicMessage { get; set; } = string.Empty;
     }
 
-    public AllocationResult Solve(List<Worker> workers, List<Cargo> cargos, int iterations = 2000)
+    public class MonteCarloEngine
     {
-        var bestScore = -99999;
-        List<Cargo> bestAssignment = new List<Cargo>();
+        // 試行回数 (多いほど良い結果が出るが遅くなる)
+        private const int SIMULATION_COUNT = 3000;
 
-        for (int i = 0; i < iterations; i++)
+        // メイン処理: 最適化を実行
+        public AllocationResult Optimize(List<Worker> allWorkers, List<Cargo> allCargoes, List<WorkerCompatibility> compatibilities)
         {
-            // 1. スタッフリストをシャッフル（運要素）
-            var shuffledWorkers = workers.OrderBy(x => _random.Next()).ToList();
+            var bestResult = new AllocationResult { Score = -999999 };
+            var rand = new Random();
+
+            for (int i = 0; i < SIMULATION_COUNT; i++)
+            {
+                // 1. シャッフル
+                var shuffledWorkers = allWorkers.OrderBy(x => rand.Next()).ToList();
+                var currentMatches = new List<CargoWorker>();
+                var availableWorkerIds = new HashSet<int>(shuffledWorkers.Select(w => w.Id));
+
+                // 2. 割り当て試行
+               // 2. 割り当て試行
+                foreach (var cargo in allCargoes)
+                {
+                    // 👇 ループ変更！定員(RequiredCount)の分だけ人を採用する！
+                    for (int count = 0; count < cargo.RequiredCount; count++)
+                    {
+                        // 条件に合う人を探す
+                        var candidate = shuffledWorkers.FirstOrDefault(w => 
+                            availableWorkerIds.Contains(w.Id) && 
+                            CanAssign(w, cargo) // 必須スキルチェック
+                        );
+
+                        if (candidate != null)
+                        {
+                            // マッチングリストに追加
+                            currentMatches.Add(new CargoWorker
+                            {
+                                CargoId = cargo.Id,
+                                WorkerId = candidate.Id,
+                                WorkerName = candidate.Name
+                            });
+                            availableWorkerIds.Remove(candidate.Id); // 割り当て済みリストへ
+                        }
+                        else
+                        {
+                            // もう条件に合う人がいない場合、この枠は空席になる
+                            break;
+                        }
+                    }
+                }
+
+                // 3. スコア計算（賢さの源）
+                // 引数に compatibilities を渡すのを忘れずに！
+                double currentScore = CalculateScore(currentMatches, allWorkers, allCargoes, compatibilities);
+
+                // 4. 最高記録更新なら保存
+                if (currentScore > bestResult.Score)
+                {
+                    bestResult.Matches = new List<CargoWorker>(currentMatches);
+                    bestResult.Score = currentScore;
+                }
+            }
+
+            bestResult.LogicMessage = $"AI (MonteCarlo) Simulated {SIMULATION_COUNT} times. Best Score: {bestResult.Score:F1}";
+            return bestResult;
+        }
+
+        // --- 必須スキルチェック ---
+        private bool CanAssign(Worker worker, Cargo cargo)
+        {
+            // "なし" や 空の場合は誰でもOK
+            if (string.IsNullOrEmpty(cargo.RequiredSkill) || cargo.RequiredSkill == "なし")
+            {
+                return true;
+            }
             
-            // 2. 割り当て管理用のリスト（誰が空いてるか）
-            // IDだけでなく、オブジェクトそのものをコピーして管理
-            var availableWorkers = shuffledWorkers.ToList();
-
-            // 3. 案件リストのコピーを作る（毎回新しい割り当てを試すため）
-            var currentCargos = cargos.Select(c => new Cargo 
-            { 
-                Id = c.Id, 
-                WorkName = c.WorkName, 
-                RequiredSkill = c.RequiredSkill,
-                AssignedWorkerId = 0 
-            }).ToList();
-
-            // 4. 【進化ポイント】賢い割り当てループ
-            foreach (var cargo in currentCargos)
+            // スキルが必要な場合、持っているかチェック
+            if (string.IsNullOrEmpty(worker.Skills) || !worker.Skills.Contains(cargo.RequiredSkill))
             {
-                // この案件に「適合する」スタッフを、空いてる人の中から探す！
-                var candidate = availableWorkers.FirstOrDefault(w => IsQualified(w, cargo.RequiredSkill));
-
-                if (candidate != null)
-                {
-                    // 適合者がいたら割り当て！
-                    cargo.AssignedWorkerId = candidate.Id;
-                    availableWorkers.Remove(candidate); // その人はもう埋まった
-                }
-                else
-                {
-                    // 適合者がいない場合、誰も割り当てない（0のまま）
-                    // 無理やり割り当てると事故になるからな！
-                }
+                return false;
             }
-
-            // 5. スコア計算
-            int score = CalculateScore(currentCargos, workers);
-
-            // 6. 過去最高なら記録更新
-            if (score > bestScore)
-            {
-                bestScore = score;
-                bestAssignment = currentCargos;
-            }
+            
+            return true;
         }
 
-        return new AllocationResult 
-        { 
-            AssignedCargos = bestAssignment, 
-            Score = bestScore, 
-            Message = $"最適化完了 (試行回数:{iterations})"
-        };
-    }
-
-    // ★重要: 「こいつはこの仕事ができるか？」を判定する審判メソッド
-    // ↓↓↓ このメソッドを修正 ↓↓↓
-    private bool IsQualified(Worker worker, string requiredSkill)
-    {
-        // 1. 誰でもできる仕事ならOK
-        if (requiredSkill == "なし" || string.IsNullOrEmpty(requiredSkill)) return true;
-
-        // 2. DBのSkillsカラムを見て判定する（正規の方法）
-        if (string.IsNullOrEmpty(worker.Skills)) return false;
-
-        // "大型免許,リフト" みたいな文字列の中に、必要なスキルが含まれてるか？
-        return worker.Skills.Contains(requiredSkill);
-    }
-
-    private int CalculateScore(List<Cargo> assignment, List<Worker> workers)
-    {
-        int score = 0;
-        foreach (var cargo in assignment)
+        // --- スコアリング（評価関数） ---
+        private double CalculateScore(
+            List<CargoWorker> matches, 
+            List<Worker> allWorkers, 
+            List<Cargo> allCargoes, 
+            List<WorkerCompatibility> compatibilities)
         {
-            if (cargo.AssignedWorkerId != 0)
+            double score = 0;
+
+            foreach (var match in matches)
             {
-                score += 10; // 割り当てられたらプラス
-                
-                // さらに、適切なスキルならボーナス（念のためここでもチェック）
-                var worker = workers.FirstOrDefault(w => w.Id == cargo.AssignedWorkerId);
-                if (worker != null && IsQualified(worker, cargo.RequiredSkill))
+                var worker = allWorkers.First(w => w.Id == match.WorkerId);
+                var cargo = allCargoes.First(c => c.Id == match.CargoId);
+
+                // --- ルール1: 疲労度チェック ---
+                if (worker.FatigueLevel > 80) score -= 50; 
+                else if (worker.FatigueLevel < 30) score += 10;
+
+                // --- ルール2: スキル適合ボーナス ---
+                if (!string.IsNullOrEmpty(cargo.RequiredSkill) 
+                    && cargo.RequiredSkill != "なし" 
+                    && worker.Skills.Contains(cargo.RequiredSkill))
                 {
-                    score += 5;
+                    score += 20;
+                }
+
+                // 🔥【ここが追加箇所！】ルール4: 人間関係（相性）チェック 🔥
+                // 今日シフトに入っている「他の全員」との相性を見る
+                foreach (var otherMatch in matches)
+                {
+                    // 自分自身とは比較しない
+                    if (match.WorkerId == otherMatch.WorkerId) continue;
+
+                    // DBの相性テーブルから、この2人のペアを探す
+                    // (AとB、または BとA のどちらかで登録されているはず)
+                    var compatibility = compatibilities.FirstOrDefault(c => 
+                        (c.WorkerId1 == match.WorkerId && c.WorkerId2 == otherMatch.WorkerId) ||
+                        (c.WorkerId1 == otherMatch.WorkerId && c.WorkerId2 == match.WorkerId)
+                    );
+
+                    if (compatibility != null)
+                    {
+                        // 相性スコアを加算！
+                        // 仲が良い(+100)ならスコアアップ
+                        // 仲が悪い(-9999)ならスコア激減 → この組み合わせは選ばれなくなる！
+                        score += compatibility.Score;
+                    }
                 }
             }
-            else
-            {
-                score -= 10; // 未割り当てはマイナス
-            }
+            
+            // 未割り当てのペナルティ (仕事があるのに人がいない場合)
+            int unassignedCargos = allCargoes.Count - matches.Select(m => m.CargoId).Distinct().Count();
+            score -= unassignedCargos * 100;
+
+            return score;
         }
-        return score;
     }
 }

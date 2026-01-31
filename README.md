@@ -7,7 +7,7 @@ Docker Compose Watch を採用し、モダンな開発体験（Hot Reload）を�
 
 | Category | Technology | Description |
 | --- | --- | --- |
-| **Frontend** | Next.js 16 (React) | App Router, Tailwind CSS |
+| **Frontend** | Next.js 16 (React) | App Router, Tailwind CSS, Turbopack |
 | **Backend** | .NET 9 (C#) | ASP.NET Core Web API, EF Core |
 | **Database** | SQL Server 2022 | Docker Container |
 | **Infra** | Docker Compose | Watch Mode enabled |
@@ -21,12 +21,12 @@ Docker Compose Watch を採用し、モダンな開発体験（Hot Reload）を�
 
 1. **リポジトリをクローン**
    ```bash
-   git clone https://github.com/EGAMIJUN/GodScheduler.git
+   git clone [https://github.com/EGAMIJUN/GodScheduler.git](https://github.com/EGAMIJUN/GodScheduler.git)
    cd GodScheduler
+'''
 
-
-2. **Docker 監視モードで起動 (推奨) バックエンド・フロントエンド共に、コード修正が即座に反映されます。**
-* バックエンド・フロントエンド共に、コード修正が即座に反映されます。
+2. **Docker 監視モードで起動 (推奨)**
+バックエンド・フロントエンド共に、コード修正が即座に反映されます（ホットリロード）。
 ```bash
 docker compose up --watch
 
@@ -37,6 +37,7 @@ docker compose up --watch
 初回起動時、DBは空の状態です。以下の手順で初期データを投入してください。
 * Swagger UI にアクセス: [http://localhost:5078/swagger](https://www.google.com/search?q=http://localhost:5078/swagger)
 * `GET /api/Seed` を実行 (Try it out -> Execute)
+* ※ これを実行すると、既存のデータはリセットされ、テスト用データが再生成されます。
 
 
 4. **アプリケーションにアクセス**
@@ -46,16 +47,12 @@ docker compose up --watch
 
 ## 🏗️ アーキテクチャ情報
 
-* **API Server**: `http://localhost:5078` (Internal: 8080)
-* **Web Client**: `http://localhost:3000`
-* **Database**: `localhost:1433`
-* **User**: `sa`
-* **Password**: `GodScheduler2026`
-
-
+| Service | Port (Host) | Internal Port | Credential |
+| --- | --- | --- | --- |
+| **API Server** | `5078` | `8080` | - |
+| **Web Client** | `3000` | `3000` | - |
+| **Database** | `1433` | `1433` | User: `sa` / Pass: `GodScheduler2026` |
 
 ## 👨‍💻 開発者 (Author)
 
 * **EGAMIJUN** - Port IT Specialist
-
-`

@@ -19,41 +19,33 @@ public class OptimizeController : ControllerBase
     }
 
     // --- 1. 計算ボタン用 (POST: /api/Optimize) ---
-    // 画面からは何も受け取らない！勝手にDBを見る！
     [HttpPost]
-    public async Task<ActionResult<MonteCarloEngine.AllocationResult>> Post()
+    public async Task<ActionResult<AllocationResult>> Post()
     {
-        // DBからデータを引っ張ってくる
         var workers = await _context.Workers.ToListAsync();
         var cargos = await _context.Cargos.ToListAsync();
-
+        var compatibilities = await _context.WorkerCompatibilities.ToListAsync();
         if (!workers.Any() || !cargos.Any())
         {
-            return BadRequest("DBが空っぽバイ！ /api/Seed を叩いてデータを入れてくれ！");
+            return BadRequest("DBが空っぽバイ！先に /api/Seed を実行してデータを投入してくれ！");
         }
 
-        // 計算実行！
-        var result = _engine.Solve(workers, cargos);
+        var result = _engine.Optimize(workers, cargos, compatibilities);
+        
         return Ok(result);
     }
 
-    // ... (前略) ...
-
-    // ★追加: 画面を開いた時に、DBの最新状態を返す (GET: /api/Optimize)
+    // --- 2. 画面表示用 (GET: /api/Optimize) ---
     [HttpGet]
     public async Task<ActionResult> Get()
     {
         var workers = await _context.Workers.ToListAsync();
         var cargos = await _context.Cargos.ToListAsync();
-        
-        // 作業員と案件をセットで返す
         return Ok(new { workers, cargos });
     }
 
-    // ... (以下、Postメソッドなどが続く) ...
-
-    // --- 2. 確定保存ボタン用 (POST: /api/Optimize/Confirm) ---
-    // 画面から「確定したシフト」を受け取る！
+    // --- 3. 確定保存ボタン用 (POST: /api/Optimize/Confirm) ---
+    // 👇 ここに Confirm は「1つだけ」あるべきバイ！
     [HttpPost("Confirm")]
     public async Task<ActionResult> Confirm([FromBody] List<Cargo> confirmedCargos)
     {
@@ -67,12 +59,12 @@ public class OptimizeController : ControllerBase
             var cargoInDb = await _context.Cargos.FindAsync(cargoDto.Id);
             if (cargoInDb != null)
             {
-                // 担当者を更新
                 cargoInDb.AssignedWorkerId = cargoDto.AssignedWorkerId;
             }
         }
 
         await _context.SaveChangesAsync();
-        return Ok(new { message = "シフトを確定保存しました！明日もご安全に！" });
+        
+        return Ok(new { message = "⚡️激速ホットリロード成功！明日もご安全に！" });
     }
 }

@@ -1,15 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using GodScheduler.Api.Data;
+using GodScheduler.Api.Services; // 👈 1. これを追加！
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. サービスの登録エリア ---
+// --- サービスの登録エリア ---
 
-// DB接続の設定
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// CORS設定
+// 👇 2. 【ここに追加！】SeedServiceを使えるように登録するバイ
+builder.Services.AddScoped<ISeedService, SeedService>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -28,27 +30,21 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// =========================================================
-// 👇【追加】ここバイ！起動時にDBがなければ自動で作る魔法！
-// =========================================================
+// (以下、既存のDB自動作成ロジックなどはそのままでOK)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        // データベースがなければ作成する！
         context.Database.EnsureCreated();
-        Console.WriteLine("✅ データベースの準備完了バイ！ (GodSchedulerDb Created)");
+        Console.WriteLine("✅ データベースの準備完了バイ！");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"⚠️ DB作成中にエラー発生バイ: {ex.Message}");
+        Console.WriteLine($"⚠️ DB作成エラー: {ex.Message}");
     }
 }
-// =========================================================
-
-// --- 2. パイプライン設定エリア ---
 
 if (app.Environment.IsDevelopment())
 {
@@ -57,11 +53,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowAll");
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
