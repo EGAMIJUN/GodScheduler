@@ -25,4 +25,7 @@ public class Worker
     [Column("branch_cd")] [StringLength(8)] public string? BranchCd { get; set; }
     [Column("created_uid")] [StringLength(16)] public string? CreatedUid { get; set; }
     [Column("deleted_at")] public DateTime? DeletedAt { get; set; }
+
+    [NotMapped]
+    public string? LastAssignedLocation { get; set; }
 }

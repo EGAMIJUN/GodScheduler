@@ -16,4 +16,5 @@ public class AppDbContext : DbContext
     public DbSet<LunchMenu> LunchMenus { get; set; }
     public DbSet<LunchOrder> LunchOrders { get; set; }
     // ↑↑↑ ここまで ↑↑↑
+    public DbSet<WorkerCompatibility> WorkerCompatibilities { get; set; }
 }

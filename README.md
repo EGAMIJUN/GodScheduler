@@ -53,12 +53,10 @@ graph TD
 
 | Category | Technology | Description |
 | --- | --- | --- |
-| **Frontend** | **Next.js 15 (React)** | App Router, Tailwind CSS, Shadcn/UI |
-| **Backend** | **.NET 9 (C#)** | ASP.NET Core Web API, EF Core |
-| **Database** | **SQL Server 2022** | Linux Container |
-| **DevOps** | **Docker** | Multi-stage builds, Compose Watch |
-
----
+| **Frontend** | Next.js 16 (React) | App Router, Tailwind CSS, Turbopack |
+| **Backend** | .NET 9 (C#) | ASP.NET Core Web API, EF Core |
+| **Database** | SQL Server 2022 | Docker Container |
+| **Infra** | Docker Compose | Watch Mode enabled |
 
 ## 🚀 Getting Started
 
@@ -66,10 +64,14 @@ graph TD
 
 * Docker Desktop (installed & running)
 
-### ⚡️ Quick Start (Watch Mode)
+1. **リポジトリをクローン**
+   ```bash
+   git clone [https://github.com/EGAMIJUN/GodScheduler.git](https://github.com/EGAMIJUN/GodScheduler.git)
+   cd GodScheduler
+'''
 
-We use `docker compose watch` for the best dev experience. Changes in code are synced instantly.
-
+2. **Docker 監視モードで起動 (推奨)**
+バックエンド・フロントエンド共に、コード修正が即座に反映されます（ホットリロード）。
 ```bash
 # 1. Clone the repository
 git clone [https://github.com/EGAMIJUN/GodScheduler.git](https://github.com/EGAMIJUN/GodScheduler.git)
@@ -82,7 +84,11 @@ docker compose up --watch
 
 ### 📦 Database Seeding
 
-On the first run, the database will be empty.
+3. **データベースの初期化 (Seed)**
+初回起動時、DBは空の状態です。以下の手順で初期データを投入してください。
+* Swagger UI にアクセス: [http://localhost:5078/swagger](https://www.google.com/search?q=http://localhost:5078/swagger)
+* `GET /api/Seed` を実行 (Try it out -> Execute)
+* ※ これを実行すると、既存のデータはリセットされ、テスト用データが再生成されます。
 
 1. Go to **Swagger UI**: [http://localhost:5078/swagger](https://www.google.com/search?q=http://localhost:5078/swagger)
 2. Execute `GET /api/Seed` to populate initial data.
@@ -97,18 +103,12 @@ On the first run, the database will be empty.
 
 ## 🔮 Roadmap
 
-* [x] Docker Environment Setup (Watch Mode)
-* [x] Basic CRUD API & Frontend
-* [ ] **Phase 2:** Lunch Order Feature 🍱
-* [ ] **Phase 3:** AI Automatic Gang Assignment Logic
-* [ ] **Phase 4:** Mobile View for Field Workers
-
----
-
-## 👤 Author
+| Service | Port (Host) | Internal Port | Credential |
+| --- | --- | --- | --- |
+| **API Server** | `5078` | `8080` | - |
+| **Web Client** | `3000` | `3000` | - |
+| **Database** | `1433` | `1433` | User: `sa` / Pass: `GodScheduler2026` |
 
 **Jun Egami** *Port-Tech Architect* [GitHub Profile](https://github.com/EGAMIJUN)
 
-**お疲れ！最高の一日やったな！**
-
-```
+* **EGAMIJUN** - Port IT Specialist

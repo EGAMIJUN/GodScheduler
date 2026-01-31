@@ -162,3 +162,4 @@
 /Users/egamijun/Dev/GodScheduler/GodScheduler.Api/obj/Debug/net9.0/GodScheduler.Api.pdb
 /Users/egamijun/Dev/GodScheduler/GodScheduler.Api/obj/Debug/net9.0/GodScheduler.Api.genruntimeconfig.cache
 /Users/egamijun/Dev/GodScheduler/GodScheduler.Api/obj/Debug/net9.0/ref/GodScheduler.Api.dll
+/Users/egamijun/Dev/GodScheduler/GodScheduler.Api/obj/Debug/net9.0/GodScheduler.Api.sourcelink.json

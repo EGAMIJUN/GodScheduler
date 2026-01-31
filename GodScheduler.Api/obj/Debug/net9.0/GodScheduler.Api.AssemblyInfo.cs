@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GodScheduler.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+68dceace6fff653562144f0b99f4f695d372afd2")]
 [assembly: System.Reflection.AssemblyProductAttribute("GodScheduler.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GodScheduler.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

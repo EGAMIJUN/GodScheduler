@@ -9,14 +9,23 @@ public class CargoWorker
     [Key]
     public int Id { get; set; }
 
+    // 👇 AIエンジンは "WorkerId" を探してる！ DBの "base_no" と紐付けるぞ
     [Column("base_no")]
-    public int BaseNo { get; set; } // Workerとの紐付けキーと思われる
+    public int WorkerId { get; set; } 
 
-    // Cargoとの紐付けが必要だが、ER図上カラムが見当たらない場合、外部キーを追加検討
-    // [Column("cargo_id")] public int CargoId { get; set; } 
+    // 👇 これがないと「どの仕事か」分からんバイ！コメントアウト解除！
+    [Column("cargo_id")] 
+    public int CargoId { get; set; } 
 
     [Column("s_time")] public TimeSpan? StartTime { get; set; }
     [Column("e_time")] public TimeSpan? EndTime { get; set; }
     
-    [Column("competence")] public int Competence { get; set; } // 必要な資格コード？
+    [Column("competence")] public int Competence { get; set; } // 資格コード
+
+    // ---------------------------------------------------------
+    // 👇【追加】AI配番の表示用プロパティ
+    // DBには保存しないから [NotMapped] をつけて無視させる！
+    // ---------------------------------------------------------
+    [NotMapped]
+    public string WorkerName { get; set; } = string.Empty;
 }
