@@ -34,19 +34,16 @@ Managing "Gangs" (teams of port workers) and cargo orders is complex. This syste
 Modern Monorepo structure fully containerized with Docker.
 
 ```mermaid
-graph TD
-    User[👷 Port Worker / Admin] -->|Browser| FE[💻 Frontend (Next.js 15)]
+flowchart TD
+    User["👷 Port Worker / Admin"] -->|Browser| FE["💻 Frontend (Next.js 15)"]
     
-    subgraph "Docker Container Network"
-        FE -->|REST / JSON| API[⚙️ Backend API (.NET 9)]
-        API -->|EF Core| DB[(🛢 SQL Server 2022)]
+    subgraph Docker["Docker Container Network"]
+        FE -->|REST / JSON| API["⚙️ Backend API (.NET 9)"]
+        API -->|EF Core| DB[("🛢 SQL Server 2022")]
         
-        API -.->|Hot Reload| Watch[👀 Docker Compose Watch]
+        API -.->|Hot Reload| Watch["👀 Docker Compose Watch"]
         FE -.->|Hot Reload| Watch
     end
-
-```
-
 ---
 
 ## 🛠 Tech Stack
