@@ -44,7 +44,7 @@ flowchart TD
         API -.->|Hot Reload| Watch["👀 Docker Compose Watch"]
         FE -.->|Hot Reload| Watch
     end
----
+```
 
 ## 🛠 Tech Stack
 
